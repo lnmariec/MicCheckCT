@@ -1,0 +1,17 @@
+# Keys and passwords: never upload
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Editor and system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

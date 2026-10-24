@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MicCheckCT homepage, town first</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&amp;family=IBM+Plex+Mono:wght@500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#14110F}
+a{color:#F2B33D}a:hover{color:#FFD27A}
+</style>
+</helmet>
+<div style="background: #14110F; color: #F3EDE3; font-family: 'IBM Plex Sans', sans-serif; min-height: 100vh">
+
+<header style="border-bottom: 1px solid #2E2925">
+<div style="max-width: 1180px; margin: 0 auto; padding: 18px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<a href="#top" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #F3EDE3">
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"></rect><path d="M5 10a7 7 0 0 0 14 0"></path><path d="M12 17v5"></path><path d="M8 22h8"></path></svg>
+<span style="font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 30px; letter-spacing: 0.5px; text-transform: uppercase">MicCheck<span style="color: {{accent}}">CT</span></span>
+</a>
+<nav aria-label="Main" style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px">
+<a href="#results" style="color: #F3EDE3; text-decoration: none; padding: 12px 14px; font-weight: 500">Near me</a>
+<a href="#venues" style="color: #F3EDE3; text-decoration: none; padding: 12px 14px; font-weight: 500">Venues</a>
+<a href="#submit" style="background: {{accent}}; color: #14110F; text-decoration: none; padding: 12px 18px; border-radius: 999px; font-weight: 600; margin-left: 8px">Submit an event</a>
+</nav>
+</div>
+</header>
+
+<section id="top" style="max-width: 1180px; margin: 0 auto; padding: 56px 24px 28px">
+<p style="margin: 0 0 14px; font-family: 'IBM Plex Mono', monospace; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; color: #A89F92">Connecticut's local music calendar</p>
+<h1 style="margin: 0; font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: clamp(44px, 7vw, 92px); line-height: 0.92; text-transform: uppercase; letter-spacing: 0.5px; max-width: 980px">What's on <span style="color: {{accent}}">near you</span> this week</h1>
+
+<div style="margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end">
+<div style="display: flex; flex-direction: column; gap: 6px; flex: 1 1 240px; max-width: 320px">
+<label for="town" style="font-size: 14px; font-weight: 500; color: #CFC6B8">Your town</label>
+<select id="town" value="{{town}}" onChange="{{onTown}}" style="height: 52px; box-sizing: border-box; padding: 0 14px; border-radius: 10px; border: 1px solid #4A423B; background: #1E1A17; color: #F3EDE3; font: inherit; font-size: 17px; font-weight: 500">
+<sc-for list="{{townOptions}}" as="o" hint-placeholder-count="12">
+<option value="{{o}}">{{o}}</option>
+</sc-for>
+</select>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; flex: 0 1 180px">
+<label for="radius" style="font-size: 14px; font-weight: 500; color: #CFC6B8">Within</label>
+<select id="radius" value="{{radius}}" onChange="{{onRadius}}" style="height: 52px; box-sizing: border-box; padding: 0 14px; border-radius: 10px; border: 1px solid #4A423B; background: #1E1A17; color: #F3EDE3; font: inherit; font-size: 17px; font-weight: 500">
+<option value="5">5 miles</option>
+<option value="10">10 miles</option>
+<option value="15">15 miles</option>
+<option value="25">25 miles</option>
+<option value="50">50 miles</option>
+</select>
+</div>
+</div>
+
+<div role="group" aria-label="Filter by type" style="margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px">
+<sc-for list="{{pills}}" as="p" hint-placeholder-count="4">
+<button type="button" onClick="{{p.pick}}" aria-pressed="{{p.pressed}}" style="{{p.style}}">{{p.label}}</button>
+</sc-for>
+</div>
+<p style="margin: 18px 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 15px; color: #A89F92">{{summary}}</p>
+<p style="margin: 6px 0 0; font-size: 14px; color: #8F877B">We'll remember your town on this device.</p>
+</section>
+
+<div id="results" style="max-width: 1180px; margin: 0 auto; padding: 8px 24px 80px; display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start">
+
+<main style="flex: 999 1 560px; min-width: 0">
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+<section style="margin-bottom: 44px">
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 14px; flex-wrap: wrap; border-bottom: 2px solid {{accent}}; padding-bottom: 10px">
+<h2 style="margin: 0; font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 44px; text-transform: uppercase; letter-spacing: 0.5px">{{g.town}}</h2>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; color: #A89F92">{{g.dist}} · {{g.count}}</span>
+</div>
+<sc-for list="{{g.rows}}" as="r" hint-placeholder-count="4">
+<article style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; padding: 16px 0; border-bottom: 1px solid #2E2925">
+<div style="flex: 0 0 112px; font-family: 'IBM Plex Mono', monospace; font-size: 15px; line-height: 1.35">
+<div style="color: #F3EDE3">{{r.day}}</div>
+<div style="color: {{r.timeColor}}">{{r.time}}</div>
+</div>
+<div style="flex: 1 1 260px; min-width: 0">
+<h3 style="margin: 0; font-size: 19px; font-weight: 600; line-height: 1.3">{{r.title}}</h3>
+<p style="margin: 3px 0 0; font-size: 15px; color: #CFC6B8">{{r.venue}}<sc-if value="{{r.hasNote}}" hint-placeholder-val="{{ false }}"> <span style="color: #8F877B">·</span> <span style="color: #A89F92">{{r.note}}</span></sc-if></p>
+</div>
+<span style="{{r.tagStyle}}">{{r.tag}}</span>
+</article>
+</sc-for>
+</section>
+</sc-for>
+<sc-if value="{{empty}}" hint-placeholder-val="{{ false }}">
+<div style="border: 1px dashed #4A423B; border-radius: 16px; padding: 28px">
+<p style="margin: 0 0 8px; font-size: 19px; font-weight: 600">Nothing in range yet.</p>
+<p style="margin: 0; font-size: 16px; color: #CFC6B8">Try a wider distance, or another type of night.</p>
+</div>
+</sc-if>
+</main>
+
+<aside style="flex: 1 1 300px; display: flex; flex-direction: column; gap: 20px">
+<section id="submit" style="background: #1E1A17; border: 1px solid #2E2925; border-radius: 16px; padding: 24px">
+<h2 style="margin: 0 0 8px; font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 30px; text-transform: uppercase">Playing out?</h2>
+<p style="margin: 0 0 18px; font-size: 16px; line-height: 1.5; color: #CFC6B8">Bands, venues and hosts can add a show in a minute. We check every listing before it goes live.</p>
+<a href="#submit" style="display: inline-block; background: {{accent}}; color: #14110F; text-decoration: none; padding: 13px 20px; border-radius: 999px; font-weight: 600">Submit an event</a>
+</section>
+
+<section id="venues" style="background: #1E1A17; border: 1px solid #2E2925; border-radius: 16px; padding: 24px">
+<h2 style="margin: 0 0 8px; font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; font-size: 30px; text-transform: uppercase">Weekly regulars</h2>
+<p style="margin: 0 0 14px; font-size: 15px; line-height: 1.5; color: #CFC6B8">Recurring open mics and karaoke nights, confirmed by locals.</p>
+<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px">
+<sc-for list="{{regulars}}" as="x" hint-placeholder-count="4">
+<li style="display: flex; justify-content: space-between; gap: 12px; font-size: 15px"><span>{{x.what}}</span><span style="font-family: 'IBM Plex Mono', monospace; color: #A89F92; white-space: nowrap">{{x.when}}</span></li>
+</sc-for>
+</ul>
+</section>
+</aside>
+</div>
+
+<footer style="border-top: 1px solid #2E2925">
+<div style="max-width: 1180px; margin: 0 auto; padding: 28px 24px; display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; font-size: 14px; color: #A89F92">
+<span>MicCheckCT · Local music across Connecticut</span>
+<span>Spot a mistake? <a href="#submit">Tell us</a></span>
+</div>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#F2B33D","options":["#F2B33D","#FF7A45","#7FD1B9","#C9A7FF"]},"$preview":{"width":1360,"height":2300}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { cat: "all", town: "New Haven", radius: "15" }; }
+  renderVals() {
+    const accent = this.props.accent ?? "#F2B33D";
+    const { cat, town, radius } = this.state;
+    const C = {
+      "Branford": [41.279, -72.815], "Bristol": [41.672, -72.949], "Chester": [41.403, -72.451],
+      "Colchester": [41.575, -72.332], "Deep River": [41.386, -72.436], "East Hartford": [41.782, -72.612],
+      "Essex": [41.353, -72.391], "Guilford": [41.289, -72.682], "Hamden": [41.396, -72.897],
+      "Hartford": [41.764, -72.685], "Milford": [41.222, -73.057], "Monroe": [41.332, -73.207],
+      "New Britain": [41.661, -72.780], "New Haven": [41.308, -72.928], "Newington": [41.698, -72.724],
+      "Old Lyme": [41.316, -72.329], "Old Saybrook": [41.292, -72.376], "Portland": [41.573, -72.641],
+      "Southington": [41.600, -72.878], "Uncasville": [41.434, -72.110], "Westbrook": [41.285, -72.447]
+    };
+    const miles = (a, b) => {
+      const R = 3958.8, r = Math.PI / 180;
+      const dLat = (b[0] - a[0]) * r, dLng = (b[1] - a[1]) * r;
+      const h = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dLng / 2) ** 2;
+      return 2 * R * Math.asin(Math.sqrt(h));
+    };
+    const L = "live", O = "open", K = "karaoke";
+    const T = "Thu Oct 8", F = "Fri Oct 9";
+    const all = [
+      [T, "5:00 PM", L, "Inner Groove", "Cafe Atlantique", "Milford"],
+      [T, "5:30 PM", L, "Bruce Thorndike & Dana Takaki", "Old Lyme Inn", "Old Lyme"],
+      [T, "6:00 PM", L, "Steve Cleary", "Choo Choo Lounge at Saybrook Point", "Old Saybrook"],
+      [T, "6:30 PM", O, "Open Mic", "The Factory Brewing Collective", "Bristol"],
+      [T, "6:30 PM", L, "Chelsea Lorraine", "Little House Brewing", "Chester"],
+      [T, "7:00 PM", L, "The Gibbons", "Bill's Seafood", "Westbrook"],
+      [T, "7:00 PM", O, "Open Mic", "Highliner III", "Westbrook", "2nd & 4th Thursdays"],
+      [T, "7:00 PM", O, "Acoustic Open Mic", "Pine Loft", "Newington"],
+      [T, "7:00 PM", L, "Tip of The Hat", "The Marketplace at Guilford Food Center", "Guilford", "Springsteen tribute"],
+      [T, "7:30 PM", O, "Open Mic", "Blackstone", "Southington"],
+      [T, "8:00 PM", L, "Soraia / Chaser Eight / Haunting Titans", "cafe nine", "New Haven"],
+      [T, "8:00 PM", L, "Shakedown Citi", "The Space Ballroom", "Hamden"],
+      [T, "8:00 PM", L, "The Cherry Pie Band", "The Griswold Inn", "Essex"],
+      [T, "8:00 PM", O, "Open Mic", "The Juke", "Deep River"],
+      [T, "8:30 PM", O, "Open Mic", "Carmine's", "East Hartford"],
+      [T, "", K, "Karaoke", "Anthony D's", "Milford"],
+      [T, "", K, "Karaoke", "La Luna", "Branford"],
+      [T, "", K, "Karaoke", "Comix Roadhouse", "Uncasville"],
+      [T, "", K, "Karaoke", "Winchester Cafe", "Portland"],
+      [F, "6:00 PM", O, "Open Mic", "Nightingale's Acoustic Cafe", "Old Lyme", "2nd Fridays"],
+      [F, "6:00 PM", O, "Open Mic", "Hop Culture", "Colchester"],
+      [F, "6:00 PM", L, "The Modeans", "Bill's Seafood", "Westbrook"],
+      [F, "7:00 PM", L, "Kingsley Flood / The Shellye Valauskas Experience", "Best Video", "Hamden"],
+      [F, "8:00 PM", L, "The The Band Band", "The Kate", "Old Saybrook", "Tribute to The Band"],
+      [F, "8:00 PM", L, "The P.J Madry Experience", "The Side Door Jazz Club", "Old Lyme"],
+      [F, "8:00 PM", L, "Sheer Terror / Burn Kit / dethwish / Remedies", "cafe nine", "New Haven"],
+      [F, "8:30 PM", L, "Jeff Lederer & the Wildebeest Wind Quintet", "Firehouse 12", "New Haven"],
+      [F, "", K, "Karaoke", "The Brownstone", "Hartford"],
+      [F, "", K, "Karaoke", "Elmer's Place", "New Britain"],
+      [F, "", K, "Karaoke", "Monroe Social", "Monroe"]
+    ];
+    const TAG = {
+      live: { label: "Live music", style: "background: " + accent + "; color: #14110F;" },
+      open: { label: "Open mic", style: "background: transparent; color: #F3EDE3; border: 1.5px solid #F3EDE3;" },
+      karaoke: { label: "Karaoke", style: "background: #3A332D; color: #F3EDE3;" }
+    };
+    const base = "font-size: 13px; font-weight: 600; letter-spacing: 0.3px; padding: 6px 12px; border-radius: 999px; white-space: nowrap; ";
+    const home = C[town], max = Number(radius);
+    const byTown = {};
+    all.forEach(r => {
+      if (cat !== "all" && r[2] !== cat) return;
+      const d = miles(home, C[r[5]]);
+      if (d > max) return;
+      (byTown[r[5]] = byTown[r[5]] || { town: r[5], d: d, rows: [] }).rows.push({
+        day: r[0], time: r[1] || "Time TBA", timeColor: r[1] ? "#F3EDE3" : "#A89F92",
+        title: r[3], venue: r[4], note: r[6] || "", hasNote: !!r[6],
+        tag: TAG[r[2]].label, tagStyle: base + TAG[r[2]].style
+      });
+    });
+    const groups = Object.values(byTown).sort((a, b) => a.d - b.d).map(g => ({
+      town: g.town,
+      dist: g.town === town ? "Your town" : Math.max(1, Math.round(g.d)) + " mi away",
+      count: g.rows.length + (g.rows.length === 1 ? " listing" : " listings"),
+      rows: g.rows
+    }));
+    const total = groups.reduce((n, g) => n + g.rows.length, 0);
+    const pillDefs = [["all", "All"], ["live", "Live music"], ["open", "Open mic"], ["karaoke", "Karaoke"]];
+    const pills = pillDefs.map(([id, label]) => {
+      const on = cat === id;
+      return {
+        label: label, pressed: on ? "true" : "false",
+        pick: () => this.setState({ cat: id }),
+        style: "min-height: 44px; padding: 0 18px; border-radius: 999px; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; " +
+          (on ? "background: " + accent + "; color: #14110F; border: 1.5px solid " + accent + ";"
+              : "background: transparent; color: #F3EDE3; border: 1.5px solid #4A423B;")
+      };
+    });
+    return {
+      accent: accent, town: town, radius: radius, pills: pills, groups: groups, empty: groups.length === 0,
+      townOptions: Object.keys(C).sort(),
+      onTown: (e) => this.setState({ town: e.target.value }),
+      onRadius: (e) => this.setState({ radius: e.target.value }),
+      summary: total + " listings in " + groups.length + (groups.length === 1 ? " town" : " towns") + " within " + radius + " miles of " + town,
+      regulars: [
+        { what: "Open Mic · The Elm, Branford", when: "Tuesdays" },
+        { what: "Open Mic · Country Tavern, Guilford", when: "Mondays" },
+        { what: "Karaoke · La Luna, Branford", when: "Thursdays" },
+        { what: "Karaoke · Anthony D's, Milford", when: "Thursdays" }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
