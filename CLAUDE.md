@@ -20,5 +20,6 @@ A free website listing live music, open mics and karaoke across Connecticut. Rea
 ## Files
 
 - `BUILD_BRIEF.md`: the plan.
-- `db/miccheckct_schema.sql`: database definition, v4 (matches Supabase).
+- `db/miccheckct_schema.sql`: database definition, v5 (matches Supabase).
+- `db/towns.sql`: the towns table and its 182 rows (already run in Supabase).
 - `design/homepage-design.dc.html`: the approved homepage design, from a design tool. Use it for layout, colors, fonts and behavior; its data is sample data.

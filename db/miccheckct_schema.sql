@@ -1,5 +1,5 @@
 -- =====================================================================
--- MicCheckCT database schema (v4: blank start times, artists.is_local, every-N-weeks rules, events.time_tba)
+-- MicCheckCT database schema (v5: towns table; v4: blank start times, artists.is_local, every-N-weeks rules, events.time_tba)
 -- Run once in Supabase: Dashboard > SQL Editor > New query > paste > Run
 -- =====================================================================
 -- Tables:
@@ -10,6 +10,7 @@
 --   event_artists      which artists play which events
 --   recurring_events   weekly or monthly rules for open mics, karaoke, jams
 --   recurring_exceptions  dates a recurring night is skipped (holidays, cancellations)
+--   towns              center point of every town and village, for distance (data: db/towns.sql)
 -- View:
 --   upcoming_listings  what the website shows: one-off events plus recurring
 --                      nights expanded into real dates for the next 60 days
@@ -167,6 +168,20 @@ create table recurring_exceptions (
 
 
 -- ---------------------------------------------------------------------
+-- TOWNS (v5): one point per place a visitor can pick, for distance.
+-- All 169 CT towns plus the villages and out-of-state towns used in
+-- venues.town. Rows are loaded by db/towns.sql.
+-- ---------------------------------------------------------------------
+create table towns (
+  name       text not null,               -- matches venues.town
+  state      text not null default 'CT',
+  kind       text not null check (kind in ('town', 'village')),  -- village = part of a town
+  latitude   numeric(9,6) not null,
+  longitude  numeric(9,6) not null,
+  primary key (name, state)
+);
+
+-- ---------------------------------------------------------------------
 -- UPCOMING_LISTINGS view: what the website reads
 -- One-off events + recurring rules expanded into dates, next 60 days,
 -- all times in Connecticut local time.
@@ -226,6 +241,7 @@ alter table events               enable row level security;
 alter table event_artists        enable row level security;
 alter table recurring_events     enable row level security;
 alter table recurring_exceptions enable row level security;
+alter table towns                enable row level security;
 
 create policy "public can read active venues"
   on venues for select to anon, authenticated using (is_active);
@@ -245,7 +261,11 @@ create policy "public can read active recurring events"
 create policy "public can read recurring exceptions"
   on recurring_exceptions for select to anon, authenticated using (true);
 
+create policy "public can read towns"
+  on towns for select to anon, authenticated using (true);
+
 -- sources has no public policy: it stays private (feed URLs, error logs).
 -- Stage 2 will add one policy letting the public INSERT events with status 'pending'.
 
 grant select on upcoming_listings to anon, authenticated;
+grant select on towns to anon, authenticated;
