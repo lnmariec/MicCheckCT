@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MicCheckCT: live music, open mics and karaoke near you</title>
+<meta name="description" content="Connecticut's local music calendar. Live music, open mics and karaoke near your town this week.">
+<meta name="theme-color" content="#14110F">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F2B33D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='2' width='6' height='12' rx='3'/%3E%3Cpath d='M5 10a7 7 0 0 0 14 0'/%3E%3Cpath d='M12 17v5'/%3E%3Cpath d='M8 22h8'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a href="#top" class="logo">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"></rect><path d="M5 10a7 7 0 0 0 14 0"></path><path d="M12 17v5"></path><path d="M8 22h8"></path></svg>
+      <span class="logo-text">MicCheck<span class="accent">CT</span></span>
+    </a>
+    <nav aria-label="Main" class="nav">
+      <a href="#results" class="nav-link">Near me</a>
+      <a href="#regulars" class="nav-link">Regulars</a>
+      <a href="#submit" class="button">Submit an event</a>
+    </nav>
+  </div>
+</header>
+
+<section id="top" class="wrap hero">
+  <p class="eyebrow">Connecticut's local music calendar</p>
+  <h1>What's on <span class="accent">near you</span> this week</h1>
+
+  <div class="pickers">
+    <div class="field field-town">
+      <label for="town">Your town</label>
+      <select id="town"></select>
+    </div>
+    <div class="field field-radius">
+      <label for="radius">Within</label>
+      <select id="radius">
+        <option value="5">5 miles</option>
+        <option value="10">10 miles</option>
+        <option value="15">15 miles</option>
+        <option value="25">25 miles</option>
+        <option value="50">50 miles</option>
+      </select>
+    </div>
+  </div>
+
+  <div role="group" aria-label="Filter by type" class="pills" id="pills"></div>
+  <p class="summary" id="summary" aria-live="polite">Loading listings…</p>
+  <p class="remember">We'll remember your town on this device.</p>
+</section>
+
+<div id="results" class="wrap results">
+  <main class="listings">
+    <div id="groups"></div>
+    <div id="status"></div>
+    <button type="button" id="more" class="more" hidden>Show next week</button>
+  </main>
+
+  <aside class="side">
+    <section id="submit" class="panel">
+      <h2>Playing out?</h2>
+      <p>Bands, venues and hosts can add a show in a minute. We check every listing before it goes live.</p>
+      <button type="button" class="button" id="submit-button" aria-describedby="submit-note">Submit an event</button>
+      <p class="panel-note" id="submit-note" hidden>Online submissions are coming soon.</p>
+    </section>
+
+    <section id="regulars" class="panel">
+      <h2>Weekly regulars</h2>
+      <p>Recurring open mics, jams and karaoke nights near you.</p>
+      <ul class="regulars" id="regulars-list"></ul>
+    </section>
+  </aside>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>MicCheckCT · Local music across Connecticut</span>
+    <span>Spot a mistake? <a href="#submit">Tell us</a></span>
+  </div>
+</footer>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

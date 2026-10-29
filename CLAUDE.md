@@ -13,7 +13,8 @@ A free website listing live music, open mics and karaoke across Connecticut. Rea
 
 - The database already exists in Supabase and is loaded. Never drop or recreate tables. Change the database only with small, reviewed SQL, and keep `db/miccheckct_schema.sql` matching what's in Supabase.
 - Never put the Supabase service_role key in website code, and never commit any key or password. Keys live in a local `.env` file (listed in `.gitignore`) and in GitHub Actions secrets.
-- The website uses only the public anon key and reads the `upcoming_listings` view.
+- The website uses only the public anon key. It reads the `upcoming_listings` view for listings, plus the public `towns` and `recurring_events` tables (for distance and how often a regular night runs).
+- The website gets the public key from `site/config.js`, written by `scripts/make_config.py` and never committed.
 - Stay within free tiers: Supabase, Cloudflare Pages, GitHub (public repo) and GitHub Actions.
 - Facebook and other people's listing sites (Shoreline Live Music, Karaoverse, Wailing City, Bandsintown) are never scraped.
 
