@@ -12,6 +12,7 @@ A free website listing live music, open mics and karaoke across Connecticut. Rea
 ## Ground rules
 
 - The database already exists in Supabase and is loaded. Never drop or recreate tables. Change the database only with small, reviewed SQL, and keep `db/miccheckct_schema.sql` matching what's in Supabase.
+- Exception for adding shows by hand (lists Ellen sends, Facebook events): show Ellen the shows and any new venues first, and once she approves, add them yourself with a script using the service_role key from `.env`. Save the approved list in `db/updates/` and commit it as the record. Anything beyond adding shows and venues (table changes, edits or deletes) still goes through reviewed SQL that Ellen runs.
 - Never put the Supabase service_role key in website code, and never commit any key or password. Keys live in a local `.env` file (listed in `.gitignore`) and in GitHub Actions secrets.
 - The website uses only the public anon key. It reads the `upcoming_listings` view for listings, plus the public `towns` and `recurring_events` tables (for distance and how often a regular night runs).
 - The website gets the public key from `site/config.js`, written by `scripts/make_config.py` and never committed.
