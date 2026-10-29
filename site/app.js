@@ -22,7 +22,7 @@
     jam_session: { filter: "open", label: "Jam session", tag: "tag-open" },
     karaoke: { filter: "karaoke", label: "Karaoke", tag: "tag-karaoke" },
   };
-  const FILTERS = [["all", "All"], ["live", "Live music"], ["open", "Open mic"], ["karaoke", "Karaoke"]];
+  const FILTERS = [["live", "Live music"], ["open", "Open mic"], ["karaoke", "Karaoke"], ["all", "All"]];
   const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const ORDINALS = { 1: "1st", 2: "2nd", 3: "3rd", 4: "4th", "-1": "Last" };
 
@@ -52,7 +52,7 @@
   const state = {
     town: DEFAULT_TOWN,
     radius: DEFAULT_RADIUS,
-    filter: "all",
+    filter: "live", // the page opens on live music
     today: dateKey(new Date()),
     days: 0,             // days of listings loaded so far
     towns: new Map(),    // name -> { name, state, kind, lat, lon }
@@ -277,9 +277,11 @@
   function renderRegulars() {
     const max = Number(state.radius);
     const nearby = [];
+    // Regular nights are mostly karaoke and open mics, so "Live music" shows them all too.
+    const narrow = state.filter === "open" || state.filter === "karaoke";
     for (const rule of state.rules.values()) {
       const type = TYPES[rule.category];
-      if (!type || (state.filter !== "all" && type.filter !== state.filter)) continue;
+      if (!type || (narrow && type.filter !== state.filter)) continue;
       const d = distanceTo(rule.venues.town);
       if (d != null && d <= max) nearby.push({ rule, d });
     }
