@@ -31,6 +31,7 @@
     town: $("town"), radius: $("radius"), pills: $("pills"), summary: $("summary"),
     groups: $("groups"), status: $("status"), more: $("more"),
     regulars: $("regulars-list"), submit: $("submit-button"), submitNote: $("submit-note"),
+    search: $("search"), q: $("q"), suggestions: $("q-suggestions"), clear: $("clear-search"),
   };
 
   // ---------- Dates, always in Connecticut time ----------
@@ -60,6 +61,10 @@
     listings: [],
     seen: new Set(),
     error: false,
+    query: "",           // the current search, "" when not searching
+    results: null,       // search matches, or null while a search loads
+    filterBefore: null,  // type filter to restore when the search is cleared
+    suggestionsLoaded: false,
   };
 
   // ---------- Supabase ----------
@@ -101,6 +106,32 @@
       state.listings.push(Object.assign(r, { start, key }));
     }
     state.days += DAYS_PER_PAGE;
+  }
+
+  // Every listing in the next 60 days, anywhere in Connecticut, whose
+  // title, venue or town contains the search words.
+  async function searchListings(text) {
+    const term = text.replace(/[\\"*(),]/g, " ").replace(/\s+/g, " ").trim();
+    const like = `"*${term}*"`;
+    const rows = await query(
+      "upcoming_listings?select=id,listing_type,title,category,venue_name,town,start_at,time_known,event_url,ticket_url" +
+      "&or=" + encodeURIComponent(`(title.ilike.${like},venue_name.ilike.${like},town.ilike.${like})`) +
+      "&order=start_at&limit=1000");
+    return rows.map((r) => Object.assign(r, { start: new Date(r.start_at), key: dateKey(new Date(r.start_at)) }));
+  }
+
+  // Band and venue names for the search box's suggestions, loaded the first time it's used.
+  async function loadSuggestions() {
+    if (state.suggestionsLoaded) return;
+    state.suggestionsLoaded = true;
+    try {
+      const [artists, venues] = await Promise.all([
+        query("artists?select=name&limit=1000"), query("venues?select=name&limit=1000")]);
+      const names = [...new Set([...artists, ...venues].map((x) => x.name))].sort((a, b) => a.localeCompare(b));
+      els.suggestions.replaceChildren(...names.map((n) => new Option(n)));
+    } catch (err) {
+      console.error(err); // suggestions are a nicety; search still works without them
+    }
   }
 
   // ---------- Helpers ----------
@@ -171,7 +202,7 @@
     }));
   }
 
-  function listingRow(listing) {
+  function listingRow(listing, showTown) {
     const type = TYPES[listing.category];
     const row = el("article", "listing");
 
@@ -193,7 +224,7 @@
     } else {
       title.textContent = listing.title;
     }
-    const where = el("p", "listing-where", listing.venue_name);
+    const where = el("p", "listing-where", showTown && listing.town ? `${listing.venue_name}, ${listing.town}` : listing.venue_name);
     const note = listingNote(listing);
     if (note) where.append(" ", el("span", "dot", "·"), " ", el("span", "listing-note", note));
     what.append(title, where);
@@ -202,11 +233,20 @@
     return row;
   }
 
+  // By date, then time; "Time TBA" goes last within its day.
+  const byTime = (a, b) => a.key.localeCompare(b.key) || (b.time_known - a.time_known) || (a.start - b.start) || a.title.localeCompare(b.title);
+
   function render() {
     els.town.value = state.town;
     els.radius.value = state.radius;
     for (const button of els.pills.children) {
       button.setAttribute("aria-pressed", String(button.dataset.filter === state.filter));
+    }
+    els.clear.hidden = !state.query;
+    if (state.query) {
+      renderSearch();
+      renderRegulars();
+      return;
     }
 
     const max = Number(state.radius);
@@ -221,17 +261,14 @@
     }
 
     const sorted = [...groups.values()].sort((a, b) => a.d - b.d || a.town.localeCompare(b.town));
-    for (const g of sorted) {
-      // By date, then time; "Time TBA" goes last within its day.
-      g.rows.sort((a, b) => a.key.localeCompare(b.key) || (b.time_known - a.time_known) || (a.start - b.start) || a.title.localeCompare(b.title));
-    }
+    for (const g of sorted) g.rows.sort(byTime);
 
     els.groups.replaceChildren(...sorted.map((g) => {
       const section = el("section", "town-group");
       const head = el("div", "town-head");
       head.append(el("h2", null, g.town),
         el("span", "town-meta", `${g.d === 0 ? "Your town" : Math.max(1, Math.round(g.d)) + " mi away"} · ${plural(g.rows.length, "listing")}`));
-      section.append(head, ...g.rows.map(listingRow));
+      section.append(head, ...g.rows.map((l) => listingRow(l)));
       return section;
     }));
 
@@ -246,6 +283,52 @@
     els.more.hidden = state.error || state.days >= MAX_DAYS;
     els.more.textContent = state.days <= DAYS_PER_PAGE ? "Show next week" : "Show another week";
     renderRegulars();
+  }
+
+  // Search results: all of Connecticut, next 60 days, grouped by date.
+  function renderSearch() {
+    const q = state.query;
+    els.more.hidden = true;
+    if (!state.results) {
+      els.summary.textContent = `Searching for "${q}"…`;
+      els.groups.replaceChildren();
+      els.status.replaceChildren();
+      return;
+    }
+
+    const rows = state.results.filter((l) => {
+      const type = TYPES[l.category];
+      return type && (state.filter === "all" || type.filter === state.filter);
+    }).sort(byTime);
+    const days = new Map();
+    for (const l of rows) {
+      if (!days.has(l.key)) days.set(l.key, []);
+      days.get(l.key).push(l);
+    }
+    els.groups.replaceChildren(...[...days.values()].map((list) => {
+      const section = el("section", "town-group");
+      const head = el("div", "town-head");
+      head.append(el("h2", null, dayLabel(list[0].start)), el("span", "town-meta", plural(list.length, "listing")));
+      section.append(head, ...list.map((l) => listingRow(l, true)));
+      return section;
+    }));
+
+    const towns = new Set(rows.map((l) => l.town).filter(Boolean)).size;
+    const kind = state.filter === "all" ? "upcoming" : FILTERS.find(([id]) => id === state.filter)[1].toLowerCase();
+    els.summary.textContent = state.searchError ? "Search couldn't load."
+      : rows.length === 0 ? `No ${kind} listings match "${q}"`
+      : `${plural(rows.length, "listing")} matching "${q}" in ${plural(towns, "town")}, next 60 days, all of Connecticut`;
+
+    if (rows.length) {
+      els.status.replaceChildren();
+      return;
+    }
+    const box = el("div", "notice");
+    box.append(el("p", "notice-title", state.searchError ? "Search couldn't load." : `Nothing matches "${q}" yet.`),
+      el("p", "notice-text", state.searchError ? "Check your connection and try again."
+        : state.filter === "all" ? "Check the spelling, or try part of the name."
+        : "Check the spelling, or tap All to see every type of night."));
+    els.status.replaceChildren(box);
   }
 
   function renderStatus(total) {
@@ -299,13 +382,66 @@
     }));
   }
 
+  // ---------- Search ----------
+  // The search lives in the web address (?q=...) so it can be shared and the back button works.
+  function setUrl(q, push) {
+    const url = new URL(location.href);
+    if (q) url.searchParams.set("q", q); else url.searchParams.delete("q");
+    if (url.href !== location.href) history[push ? "pushState" : "replaceState"](null, "", url);
+  }
+
+  async function runSearch(text, push) {
+    const q = text.trim();
+    if (q.length < 2) return;
+    if (!state.query) state.filterBefore = state.filter;
+    Object.assign(state, { query: q, results: null, searchError: false, filter: "all" });
+    els.q.value = q;
+    setUrl(q, push);
+    render();
+    let results = [], failed = false;
+    try {
+      results = await searchListings(q);
+    } catch (err) {
+      console.error(err);
+      failed = true;
+    }
+    if (state.query !== q) return; // a newer search or a clear happened meanwhile
+    Object.assign(state, { results, searchError: failed });
+    render();
+  }
+
+  function clearSearch(push) {
+    if (!state.query) return;
+    Object.assign(state, { query: "", results: null, filter: state.filterBefore || "live" });
+    els.q.value = "";
+    setUrl("", push);
+    render();
+  }
+
+  els.search.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    els.q.blur(); // closes the phone keyboard
+    await runSearch(els.q.value, true);
+    els.summary.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  els.q.addEventListener("focus", loadSuggestions);
+  els.q.addEventListener("input", () => { if (!els.q.value) clearSearch(true); });
+  els.clear.addEventListener("click", () => clearSearch(true));
+  window.addEventListener("popstate", () => {
+    const q = new URL(location.href).searchParams.get("q") || "";
+    if (q) runSearch(q, false); else clearSearch(false);
+  });
+
   // ---------- Events ----------
   els.town.addEventListener("change", () => {
     state.town = els.town.value;
     saveTown(state.town);
-    render();
+    if (state.query) clearSearch(true); else render();
   });
-  els.radius.addEventListener("change", () => { state.radius = els.radius.value; render(); });
+  els.radius.addEventListener("change", () => {
+    state.radius = els.radius.value;
+    if (state.query) clearSearch(true); else render();
+  });
   els.pills.addEventListener("click", (e) => {
     const button = e.target.closest(".pill");
     if (!button) return;
@@ -344,6 +480,10 @@
     if (!state.towns.has(state.town) || state.towns.get(state.town).state !== "CT") state.town = DEFAULT_TOWN;
     if (state.towns.size) renderTownOptions();
     render();
+
+    const q = new URL(location.href).searchParams.get("q");
+    if (q && !state.error) runSearch(q, false); // opened from a shared search link
+    if (!state.error) loadSuggestions();
   }
 
   start();

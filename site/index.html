@@ -33,6 +33,15 @@
   <p class="eyebrow">Connecticut's local music calendar</p>
   <h1>What's on <span class="accent">near you</span> this week</h1>
 
+  <form class="search" id="search" role="search">
+    <label for="q">Looking for someone?</label>
+    <div class="search-row">
+      <input id="q" name="q" type="search" list="q-suggestions" placeholder="Band, venue or town" autocomplete="off" enterkeyhint="search">
+      <button type="submit" class="button">Search</button>
+    </div>
+    <datalist id="q-suggestions"></datalist>
+  </form>
+
   <div class="pickers">
     <div class="field field-town">
       <label for="town">Your town</label>
@@ -52,6 +61,7 @@
 
   <div role="group" aria-label="Filter by type" class="pills" id="pills"></div>
   <p class="summary" id="summary" aria-live="polite">Loading listings…</p>
+  <button type="button" class="link-button" id="clear-search" hidden>Clear search</button>
   <p class="remember">We'll remember your town on this device.</p>
   <p class="remember">Times and lineups can change. Check with the venue before you go.</p>
 </section>
