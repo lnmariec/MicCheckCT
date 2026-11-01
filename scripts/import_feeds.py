@@ -26,7 +26,7 @@ import icalendar
 
 ROOT = Path(__file__).resolve().parent.parent
 CT = ZoneInfo("America/New_York")
-USER_AGENT = "MicCheckCT feed reader (+https://miccheckct.pages.dev)"
+USER_AGENT = "MicCheckCT feed reader (+https://miccheckct.com)"
 HORIZON_DAYS = 60   # upcoming_listings shows 60 days
 MAX_PAGES = 8       # most feeds send 30 events per request
 PAUSE_SECONDS = 3   # between requests to the same site
