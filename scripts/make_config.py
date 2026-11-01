@@ -10,6 +10,7 @@ Run from the project folder:  python scripts/make_config.py
 import base64
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -59,6 +60,15 @@ def main():
         f"window.MICCHECK_CONFIG = {json.dumps({'supabaseUrl': url, 'supabaseKey': key}, indent=2)};\n",
         encoding="utf-8")
     print(f"Wrote {OUT.relative_to(ROOT)}")
+
+    # On Cloudflare, stamp this build's version onto the file addresses in index.html
+    # ("app.js?v=dev" -> "app.js?v=1b4c9fe8") so browsers fetch the new files right after
+    # each publish instead of reusing old copies. Locally, index.html is left alone.
+    commit = os.environ.get("CF_PAGES_COMMIT_SHA", "")[:8]
+    if commit:
+        page = ROOT / "site" / "index.html"
+        page.write_text(re.sub(r'\?v=[\w-]+"', f'?v={commit}"', page.read_text(encoding="utf-8")), encoding="utf-8")
+        print(f"Stamped index.html with version {commit}")
     return 0
 
 
