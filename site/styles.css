@@ -17,13 +17,14 @@
   --text-2: #D8D3C8;
   --text-3: #ADA89E;
   --text-4: #8C887F;
-  --accent: var(--brand-amber);       /* highlight backgrounds: selected filter, Live music, heading rules (never text) */
+  --accent: var(--brand-amber);       /* highlight backgrounds: selected filter, Live music (never text) */
   --accent-hover: #F7C96F;
   --link: var(--brand-sky);           /* links and the tagline */
   --link-hover: #73CBF0;
-  --primary: var(--brand-blue);       /* buttons */
-  --primary-hover: #3189D1;
-  --on-primary: var(--brand-white);
+  --primary: var(--brand-sky);        /* buttons */
+  --primary-hover: #73CBF0;
+  --on-primary: var(--brand-black);   /* white on light blue is too faint to read */
+  --rule: var(--brand-sky);           /* divider line under town and date headings */
 
   /* Brand kit fonts */
   --font-heading: "League Spartan", "Arial", sans-serif;
@@ -143,7 +144,7 @@ h1 {
 .town-group { margin-bottom: 44px; }
 .town-head {
   display: flex; align-items: baseline; justify-content: space-between; gap: 4px 14px; flex-wrap: wrap;
-  border-bottom: 2px solid var(--accent); padding-bottom: 10px;
+  border-bottom: 2px solid var(--rule); padding-bottom: 10px;
 }
 .town-head h2 {
   margin: 0; font-family: var(--font-heading); font-weight: 700; font-size: 38px;
@@ -175,7 +176,7 @@ h1 {
 }
 .tag-live { background: var(--accent); color: var(--brand-black); }
 .tag-open { background: transparent; color: var(--link); border: 1.5px solid var(--link); padding: 4.5px 10.5px; }
-.tag-karaoke { background: var(--primary); color: var(--on-primary); }
+.tag-karaoke { background: var(--brand-blue); color: var(--brand-white); }
 
 .notice { border: 1px dashed var(--border-strong); border-radius: 16px; padding: 28px; }
 .notice-title { margin: 0 0 8px; font-size: 18px; font-weight: 700; }
