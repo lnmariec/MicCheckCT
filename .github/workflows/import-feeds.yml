@@ -1,0 +1,27 @@
+# Runs the calendar feed importer every morning, and on demand from the
+# Actions tab ("Run workflow"). Keys come from the repository's Actions secrets.
+name: Daily feed import
+
+on:
+  schedule:
+    - cron: "17 10 * * *"   # 10:17 UTC: about 5 or 6 AM in Connecticut
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python scripts/import_feeds.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
