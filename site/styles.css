@@ -17,7 +17,7 @@
   --text-2: #D8D3C8;
   --text-3: #ADA89E;
   --text-4: #8C887F;
-  --accent: var(--brand-amber);       /* highlights: selected filter, Live music, heading rules */
+  --accent: var(--brand-amber);       /* highlight backgrounds: selected filter, Live music, heading rules (never text) */
   --accent-hover: #F7C96F;
   --link: var(--brand-sky);           /* links and the tagline */
   --link-hover: #73CBF0;
@@ -49,7 +49,7 @@ a { color: var(--link); }
 a:hover { color: var(--link-hover); }
 :focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
 
-.accent { color: var(--accent); }
+.accent { color: var(--link); } /* colored text is always the light blue */
 .wrap { max-width: 1180px; margin: 0 auto; padding-left: var(--gutter); padding-right: var(--gutter); }
 
 /* Buttons: blue pill */
