@@ -61,6 +61,11 @@ FEED_RULES = {
     },
 }
 
+# Other names feeds use for venues already in the database: feed name -> venue name
+ALIASES = {
+    "The Katharine Hepburn Cultural Arts Center": "The Kate",
+}
+
 OUT_OF_STATE = re.compile(r"^(NY|NYC|RI|MA|NJ|VT|NH|PA|ME|Brooklyn|Manhattan|New York)$", re.I)
 
 
@@ -240,6 +245,8 @@ class VenueMatcher:
         self.towns = {norm(t["name"]): t["name"] for t in towns if t["state"] == "CT"}
         for v in self.venues:
             v["_norm"] = norm(v["name"])
+        by_name = {v["name"]: v for v in self.venues}
+        self.aliases = {norm(alias): by_name[name] for alias, name in ALIASES.items() if name in by_name}
 
     def parse(self, location):
         """'Cafe Nine, 250 State St, New Haven, CT' -> ('cafe nine', 'New Haven', in_state)"""
@@ -253,6 +260,8 @@ class VenueMatcher:
         return place, town, True
 
     def match(self, place, town, title):
+        if place in self.aliases:
+            return self.aliases[place]
         if place:
             squash = place.replace(" ", "")  # "Firehouse12" matches "Firehouse 12"
             exact = [v for v in self.venues if v["_norm"].replace(" ", "") == squash]
@@ -422,6 +431,25 @@ def main():
                 db.request("PATCH", f"events?id=eq.{old['id']}", changes, prefer="return=minimal")
             db.request("PATCH", f"sources?id=eq.{source['id']}",
                        {"last_fetched_at": now.isoformat(), "last_status": status})
+
+    # Hidden feed shows waiting for a venue: publish any whose venue has since been added,
+    # even when today's feed couldn't be read.
+    feed_ids = ",".join(s["id"] for s in sources)
+    waiting = db.get_all(f"events?select=id,title,start_at,location_text&status=eq.hidden&venue_id=is.null"
+                         f"&location_text=not.is.null&source_id=in.({feed_ids})")
+    published = 0
+    for e in waiting:
+        place, town, in_state = matcher.parse(e["location_text"])
+        venue = matcher.match(place, town, e["title"]) if in_state else None
+        if not venue:
+            continue
+        published += 1
+        print(f"   published {e['start_at'][:10]} {e['title'][:55]} @ {venue['name']}")
+        if not dry_run:
+            db.request("PATCH", f"events?id=eq.{e['id']}",
+                       {"venue_id": venue["id"], "status": "published", "location_text": None}, prefer="return=minimal")
+    if published:
+        print(f"Venues added since: {published} hidden shows {'would be ' if dry_run else ''}published\n")
 
     print(f"Total: {totals['new']} new, {totals['updated']} updated, {totals['unchanged']} unchanged")
     if review:

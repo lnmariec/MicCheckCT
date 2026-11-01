@@ -24,4 +24,6 @@ A free website listing live music, open mics and karaoke across Connecticut. Rea
 - `BUILD_BRIEF.md`: the plan.
 - `db/miccheckct_schema.sql`: database definition, v5 (matches Supabase).
 - `db/towns.sql`: the towns table and its 182 rows (already run in Supabase).
+- `scripts/import_feeds.py`: the daily feed importer (GitHub Actions, `.github/workflows/import-feeds.yml`). `--dry-run` previews. Unmatched shows are saved hidden; once their venue exists, the next run publishes them. Feed names for existing venues go in its `ALIASES`.
+- `scripts/add_venues.py`: adds approved venues from a CSV in `db/updates/`.
 - `design/homepage-design.dc.html`: the approved homepage design, from a design tool. Use it for layout, colors, fonts and behavior; its data is sample data.
